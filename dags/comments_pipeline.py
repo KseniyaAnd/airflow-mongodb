@@ -1,3 +1,4 @@
+
 from datetime import datetime
 import os
 import re
@@ -10,9 +11,10 @@ from airflow.operators.bash import BashOperator
 from airflow.utils.task_group import TaskGroup
 
 
-INPUT_FILE = "/opt/airflow/data/comments.csv"
-
-OUTPUT_FILE = "/opt/airflow/data/processed_comments.csv"
+INPUT_FILE = os.getenv("INPUT_FILE")
+STEP1_FILE = os.getenv("STEP1_FILE")
+STEP2_FILE = os.getenv("STEP2_FILE")
+OUTPUT_FILE = os.getenv("OUTPUT_FILE")
 
 COMMENTS_ASSET = Asset("processed_comments")
 
@@ -57,18 +59,18 @@ def comments_pipeline():
         def replace_nulls():
             df = pd.read_csv(INPUT_FILE)
             df = df.fillna("-")
-            df.to_csv("/opt/airflow/data/step1.csv", index=False)
+            df.to_csv(STEP1_FILE, index=False)
 
         @task
         def sort_by_date():
-            df = pd.read_csv("/opt/airflow/data/step1.csv")
+            df = pd.read_csv(STEP1_FILE)
             df["created_date"] = pd.to_datetime(df["created_date"])
             df = df.sort_values(by="created_date")
-            df.to_csv("/opt/airflow/data/step2.csv", index=False)
+            df.to_csv(STEP2_FILE, index=False)
 
         @task(outlets=[COMMENTS_ASSET])
         def clean_content():
-            df = pd.read_csv("/opt/airflow/data/step2.csv")
+            df = pd.read_csv(STEP2_FILE)
 
             df["content"] = df["content"].apply(
                 lambda text: re.sub(
@@ -83,5 +85,6 @@ def comments_pipeline():
         replace_nulls() >> sort_by_date() >> clean_content()
 
     check >> process_comments
+
 
 comments_pipeline()

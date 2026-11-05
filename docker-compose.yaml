@@ -10,6 +10,13 @@ x-airflow-common: &airflow-common
     AIRFLOW__CORE__EXECUTION_API_SERVER_URL: http://airflow-api-server:8080/execution/
     AIRFLOW__API_AUTH__JWT_SECRET: "my-local-airflow-secret-key-2026"
     AIRFLOW__CORE__FERNET_KEY: "${AIRFLOW_FERNET_KEY}"
+    INPUT_FILE: ${INPUT_FILE}
+    STEP1_FILE: ${STEP1_FILE}
+    STEP2_FILE: ${STEP2_FILE}
+    OUTPUT_FILE: ${OUTPUT_FILE}
+    MONGODB_URI: ${MONGODB_URI}
+    MONGODB_DATABASE: ${MONGODB_DATABASE}
+    MONGODB_COLLECTION: ${MONGODB_COLLECTION}
   volumes:
     - ./dags:/opt/airflow/dags
     - ./logs:/opt/airflow/logs
