@@ -1,15 +1,12 @@
-
-from datetime import datetime
 import os
 import re
+from datetime import datetime
 
 import pandas as pd
-
-from airflow.sdk import dag, task, Asset
-from airflow.sensors.filesystem import FileSensor
 from airflow.operators.bash import BashOperator
+from airflow.sdk import Asset, dag, task
+from airflow.sensors.filesystem import FileSensor
 from airflow.utils.task_group import TaskGroup
-
 
 INPUT_FILE: str | None = os.getenv("INPUT_FILE")
 STEP1_FILE: str | None = os.getenv("STEP1_FILE")
@@ -46,7 +43,10 @@ def comments_pipeline() -> None:
 
     @task.branch
     def check_file() -> str:
-        """Check whether the input CSV file is empty and select the next task."""
+        """
+        Check whether the input CSV file is empty and
+        select the next task.
+        """
         if os.path.getsize(INPUT_FILE) == 0:
             return "empty_file"
 

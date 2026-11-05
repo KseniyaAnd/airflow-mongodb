@@ -1,14 +1,11 @@
-
-from datetime import datetime
 import os
+from datetime import datetime
 
 import pandas as pd
+from airflow.sdk import Asset, dag, task
 from pymongo import MongoClient
-from pymongo.database import Database
 from pymongo.collection import Collection
-
-from airflow.sdk import dag, task, Asset
-
+from pymongo.database import Database
 
 INPUT_FILE: str | None = os.getenv("OUTPUT_FILE")
 MONGODB_URI: str | None = os.getenv("MONGODB_URI")
