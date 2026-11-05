@@ -27,9 +27,15 @@ COMMENTS_ASSET: Asset = Asset("processed_comments")
     tags=["comments", "mongodb"],
 )
 def load_to_mongodb() -> None:
+    """
+    Load processed comments from a CSV file into MongoDB.
+
+    This DAG is triggered when the processed_comments Asset is updated.
+    """
 
     @task
     def load_comments() -> None:
+        """Read processed comments from CSV and insert them into MongoDB."""
         df: pd.DataFrame = pd.read_csv(INPUT_FILE)
         records: list[dict] = df.to_dict(orient="records")
 

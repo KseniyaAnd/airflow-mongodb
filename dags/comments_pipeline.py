@@ -28,6 +28,13 @@ COMMENTS_ASSET: Asset = Asset("processed_comments")
     tags=["comments", "pandas"],
 )
 def comments_pipeline() -> None:
+    """
+    Process comments from a CSV file.
+
+    Waits for the input file, checks whether it is empty,
+    replaces missing values, sorts records by date,
+    and cleans comment content.
+    """
 
     wait_for_file = FileSensor(
         task_id="wait_for_file",
@@ -39,6 +46,7 @@ def comments_pipeline() -> None:
 
     @task.branch
     def check_file() -> str:
+        """Check whether the input CSV file is empty and select the next task."""
         if os.path.getsize(INPUT_FILE) == 0:
             return "empty_file"
 
@@ -57,12 +65,14 @@ def comments_pipeline() -> None:
 
         @task
         def replace_nulls() -> None:
+            """Replace missing values in the input CSV with hyphens."""
             df: pd.DataFrame = pd.read_csv(INPUT_FILE)
             df = df.fillna("-")
             df.to_csv(STEP1_FILE, index=False)
 
         @task
         def sort_by_date() -> None:
+            """Sort comments by creation date in ascending order."""
             df: pd.DataFrame = pd.read_csv(STEP1_FILE)
             df["created_date"] = pd.to_datetime(df["created_date"])
             df = df.sort_values(by="created_date")
@@ -70,6 +80,7 @@ def comments_pipeline() -> None:
 
         @task(outlets=[COMMENTS_ASSET])
         def clean_content() -> None:
+            """Remove emojis and unwanted characters from comment content."""
             df: pd.DataFrame = pd.read_csv(STEP2_FILE)
 
             df["content"] = df["content"].apply(
