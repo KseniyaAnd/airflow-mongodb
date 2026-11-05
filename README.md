@@ -99,6 +99,15 @@ Three aggregation queries are implemented in `mongodb/aggregations.js`.
 
 ![Load to MongoDB](screenshots/load_to_mongodb.png)
 
+### Top 5 Most Frequent Comments
+![Top 5 Frequent Comments](screenshots/top_5_frequent_comments.png)
+
+### Comments with Content Length Less Than 5 Characters
+![Short Content Entries](screenshots/short_content_entries.png)
+
+### Average Daily Rating
+![Average Daily Rating](screenshots/average_daily_rating.png)
+
 ## Local Environment Setup
 
 ### Prerequisites
