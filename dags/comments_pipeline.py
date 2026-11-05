@@ -11,12 +11,12 @@ from airflow.operators.bash import BashOperator
 from airflow.utils.task_group import TaskGroup
 
 
-INPUT_FILE = os.getenv("INPUT_FILE")
-STEP1_FILE = os.getenv("STEP1_FILE")
-STEP2_FILE = os.getenv("STEP2_FILE")
-OUTPUT_FILE = os.getenv("OUTPUT_FILE")
+INPUT_FILE: str | None = os.getenv("INPUT_FILE")
+STEP1_FILE: str | None = os.getenv("STEP1_FILE")
+STEP2_FILE: str | None = os.getenv("STEP2_FILE")
+OUTPUT_FILE: str | None = os.getenv("OUTPUT_FILE")
 
-COMMENTS_ASSET = Asset("processed_comments")
+COMMENTS_ASSET: Asset = Asset("processed_comments")
 
 
 @dag(
@@ -27,7 +27,7 @@ COMMENTS_ASSET = Asset("processed_comments")
     catchup=False,
     tags=["comments", "pandas"],
 )
-def comments_pipeline():
+def comments_pipeline() -> None:
 
     wait_for_file = FileSensor(
         task_id="wait_for_file",
@@ -38,7 +38,7 @@ def comments_pipeline():
     )
 
     @task.branch
-    def check_file():
+    def check_file() -> str:
         if os.path.getsize(INPUT_FILE) == 0:
             return "empty_file"
 
@@ -56,21 +56,21 @@ def comments_pipeline():
     with TaskGroup(group_id="process_comments") as process_comments:
 
         @task
-        def replace_nulls():
-            df = pd.read_csv(INPUT_FILE)
+        def replace_nulls() -> None:
+            df: pd.DataFrame = pd.read_csv(INPUT_FILE)
             df = df.fillna("-")
             df.to_csv(STEP1_FILE, index=False)
 
         @task
-        def sort_by_date():
-            df = pd.read_csv(STEP1_FILE)
+        def sort_by_date() -> None:
+            df: pd.DataFrame = pd.read_csv(STEP1_FILE)
             df["created_date"] = pd.to_datetime(df["created_date"])
             df = df.sort_values(by="created_date")
             df.to_csv(STEP2_FILE, index=False)
 
         @task(outlets=[COMMENTS_ASSET])
-        def clean_content():
-            df = pd.read_csv(STEP2_FILE)
+        def clean_content() -> None:
+            df: pd.DataFrame = pd.read_csv(STEP2_FILE)
 
             df["content"] = df["content"].apply(
                 lambda text: re.sub(
